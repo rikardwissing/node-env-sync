@@ -1,0 +1,6 @@
+[
+  {
+    "file": "config/backendHosts/development.json",
+    "replace": ["myNgrokName"]
+  },
+]

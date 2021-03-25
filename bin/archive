@@ -1,0 +1,14 @@
+#!/usr/bin/env node
+const {
+  removeTempFolder,
+  copyRestoredFiles,
+  archiveRestoredFiles,
+} = require('./utils.js');
+
+removeTempFolder();
+
+copyRestoredFiles();
+const newArchiveChecksum = archiveRestoredFiles();
+console.log(newArchiveChecksum);
+
+removeTempFolder();

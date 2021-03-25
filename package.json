@@ -1,0 +1,12 @@
+{
+  "name": "env_syncer",
+  "version": "1.0.0",
+  "description": "sync env vars across team members",
+  "main": "bin/check",
+  "license": "MIT",
+  "bin": {
+    "check-env": "./bin/check",
+    "archive-env": "./bin/archive",
+    "restore-env": "./bin/restore",
+  },
+}
