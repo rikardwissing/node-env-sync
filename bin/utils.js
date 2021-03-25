@@ -3,8 +3,8 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const rootDir = path.normalize(`${__dirname}/../..`);
-const envSyncerDir = path.normalize(`${rootDir}/env_syncer`);
+const rootDir = process.cwd();
+const envSyncerDir = path.normalize(`${rootDir}/.env-sync`);
 const tmpDir = path.normalize(`${envSyncerDir}/tmp`);
 
 const envFiles = require(`${envSyncerDir}/files.json`);

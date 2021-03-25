@@ -1,0 +1,6 @@
+[
+  {
+    "file": "path/to/envfile",
+    "replace": ["stringtoreplace"]
+  }
+]

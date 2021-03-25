@@ -8,6 +8,7 @@ const {
 
 removeTempFolder();
 
+
 const myChecksum = getMyChecksum();
 const archivedChecksum = getArchivedChecksum();
 
@@ -17,6 +18,9 @@ if (myChecksum !== archivedChecksum) {
   printDiff();
   console.log('To update archive, run env_syncer/bin/archive');
   console.log('To restore from archive, run env_syncer/bin/restore');
+}
+else {
+  console.log('Env variables in sync!')
 }
 
 removeTempFolder();
