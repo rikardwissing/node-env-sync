@@ -1,5 +1,5 @@
 {
-  "name": "env_syncer",
+  "name": "node-env-sync",
   "version": "1.0.0",
   "description": "sync env vars across team members",
   "main": "bin/check",
