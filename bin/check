@@ -3,24 +3,24 @@ const {
   removeTempFolder,
   printDiff,
   getMyChecksum,
-  getArchivedChecksum,
-} = require('./utils.js');
+  getArchivedChecksum
+} = require("./utils.js");
 
 removeTempFolder();
-
 
 const myChecksum = getMyChecksum();
 const archivedChecksum = getArchivedChecksum();
 
 if (myChecksum !== archivedChecksum) {
   console.log(`${myChecksum} !== ${archivedChecksum}`);
-  console.log('Checksum mismatch, have you updated your env variables?');
+  console.log("Checksum mismatch, have you updated your env variables?");
   printDiff();
-  console.log('To update archive, run env_syncer/bin/archive');
-  console.log('To restore from archive, run env_syncer/bin/restore');
-}
-else {
-  console.log('Env variables in sync!')
+  console.log("To update archive, run env_syncer/bin/archive");
+  console.log("To restore from archive, run env_syncer/bin/restore");
+
+  process.exitCode = 1;
+} else {
+  console.log("Env variables in sync!");
 }
 
 removeTempFolder();
