@@ -14,12 +14,17 @@ const removeTempFolder = () => {
   execSync(`rm -rf ${tmpDir}`, { stdio: "inherit" });
 };
 
-const getFileContent = ({ file, replace }) => {
+const getFileContent = ({ file, replace }, reverse) => {
   let fileContent = fs.readFileSync(`${rootDir}/${file}`).toString();
 
   if (replace) {
     replace.forEach(r => {
+      if(reverse) {
       fileContent = fileContent.replace(new RegExp(envConfig[r], "g"), r);
+      }
+      else {
+        fileContent = fileContent.replace(new RegExp(r, "g"), envConfig[r]);
+      }
     });
   }
 
@@ -27,13 +32,13 @@ const getFileContent = ({ file, replace }) => {
 };
 
 const getMyEnvFilesContent = () =>
-  envFiles.reduce((a, c) => `${a}${getFileContent(c)}`, "");
+  envFiles.reduce((a, c) => `${a}${getFileContent(c, true)}`, "");
 
 const copyRestoredFiles = () => {
   envFiles.forEach(c => {
     const filePath = `${tmpDir}/my-files/${c.file}`;
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
-    fs.writeFileSync(filePath, getFileContent(c));
+    fs.writeFileSync(filePath, getFileContent(c, true));
   });
 };
 
@@ -70,6 +75,11 @@ const restoreFromArchive = () => {
   execSync(
     `cd ${rootDir}; gpg --batch --passphrase ${envConfig.archivePassword} --yes -d ${envSyncerDir}/archive.tar.gpg | tar -x`
   );
+
+  envFiles.forEach(c => {
+    const filePath = `${rootDir}/${c.file}`;
+    fs.writeFileSync(filePath, getFileContent(c, false));
+  });
 };
 
 const printDiff = () => {
