@@ -7,6 +7,7 @@
   "bin": {
     "check-env": "./bin/check",
     "archive-env": "./bin/archive",
-    "restore-env": "./bin/restore"
+    "restore-env": "./bin/restore",
+    "create-env-json": "./bin/create-env-json"
   }
 }

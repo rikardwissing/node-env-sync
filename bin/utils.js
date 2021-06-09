@@ -8,7 +8,12 @@ const envSyncerDir = path.normalize(`${rootDir}/.env-sync`);
 const tmpDir = path.normalize(`${envSyncerDir}/tmp`);
 
 const envFiles = require(`${envSyncerDir}/files.json`);
-const envConfig = require(`${envSyncerDir}/env.json`);
+
+let envConfig
+const envConfigPath = `${envSyncerDir}/env.json`
+if(fs.existsSync(envConfigPath)) {
+  envConfig = require(`${envSyncerDir}/env.json`);
+}
 
 const removeTempFolder = () => {
   execSync(`rm -rf ${tmpDir}`, { stdio: "inherit" });
@@ -114,6 +119,7 @@ module.exports = {
   rootDir,
   envSyncerDir,
   envFiles,
+  envConfigPath,
   envConfig,
   getFileContent,
   getMyEnvFilesContent,
