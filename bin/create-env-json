@@ -1,0 +1,9 @@
+#!/usr/bin/env node
+const fs = require('fs');
+const {
+  envConfigPath,
+} = require('./utils.js');
+
+fs.writeFileSync(envConfigPath, JSON.stringify({
+  archivePassword: process.argv.slice(2)[0]
+}, null, 2));
