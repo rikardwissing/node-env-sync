@@ -20,12 +20,16 @@ const removeTempFolder = () => {
 };
 
 const getFileContent = ({ file, replace }, reverse) => {
+  if(!replace) {
+    return fs.readFileSync(`${rootDir}/${file}`);
+  }
+
   let fileContent = fs.readFileSync(`${rootDir}/${file}`).toString();
 
   if (replace) {
     replace.forEach(r => {
       if(reverse) {
-      fileContent = fileContent.replace(new RegExp(envConfig[r], "g"), r);
+        fileContent = fileContent.replace(new RegExp(envConfig[r], "g"), r);
       }
       else {
         fileContent = fileContent.replace(new RegExp(r, "g"), envConfig[r]);
@@ -33,11 +37,11 @@ const getFileContent = ({ file, replace }, reverse) => {
     });
   }
 
-  return fileContent;
+  return Buffer.from(fileContent);
 };
 
 const getMyEnvFilesContent = () =>
-  envFiles.reduce((a, c) => `${a}${getFileContent(c, true)}`, "");
+  envFiles.reduce((a, c) => { return Buffer.concat([a, getFileContent(c, true)]) }, Buffer.from(""))
 
 const copyRestoredFiles = () => {
   envFiles.forEach(c => {
