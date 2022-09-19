@@ -8,7 +8,8 @@ const {
 removeTempFolder();
 
 copyRestoredFiles();
-const newArchiveChecksum = archiveRestoredFiles();
-console.log(newArchiveChecksum);
+archiveRestoredFiles().then((newArchiveChecksum) => {
+  console.log(newArchiveChecksum);
+  removeTempFolder();
+});
 
-removeTempFolder();
