@@ -9,5 +9,8 @@
     "archive-env": "./bin/archive",
     "restore-env": "./bin/restore",
     "create-env-json": "./bin/create-env-json"
+  },
+  "dependencies": {
+    "openpgp": "^5.5.0"
   }
 }
