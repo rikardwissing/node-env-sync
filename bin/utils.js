@@ -2,6 +2,7 @@ const { execSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
+const openpgp = require('openpgp');
 
 const rootDir = process.cwd();
 const envSyncerDir = path.normalize(`${rootDir}/.env-sync`);
@@ -51,14 +52,30 @@ const copyRestoredFiles = () => {
   });
 };
 
-const archiveRestoredFiles = () => {
+const archiveRestoredFiles = async () => {
   const fileList = envFiles.map(a => a.file).join(" ");
+
   execSync(
-    `cd ${tmpDir}/my-files; tar -c ${fileList} | gpg --batch --passphrase ${envConfig.archivePassword} --yes -c -o ${envSyncerDir}/archive.tar.gpg`
+    `cd ${tmpDir}/my-files; tar -czvf ${envSyncerDir}/archive.tar ${fileList}`
   );
 
+  const decryptedArchive = fs.readFileSync(`${envSyncerDir}/archive.tar`)
+  const decryptedMessage = await openpgp.createMessage({ binary: decryptedArchive });
+
+  const encrypted = await openpgp.encrypt({
+    message: decryptedMessage,
+    passwords: [envConfig.archivePassword],
+    format: 'binary'
+  });
+
+  fs.writeFileSync(`${envSyncerDir}/archive.tar.gpg`, Buffer.from(encrypted));
+  execSync(`rm ${envSyncerDir}/archive.tar`);
+
   const myChecksum = getMyChecksum();
+
   fs.writeFileSync(`${envSyncerDir}/archived_checksum`, myChecksum);
+
+  return myChecksum
 };
 
 const getMyChecksum = () =>
@@ -72,31 +89,54 @@ const getArchivedChecksum = () =>
     ? fs.readFileSync(`${envSyncerDir}/archived_checksum`).toString()
     : "";
 
-const extractArchivedFiles = () => {
-  fs.mkdirSync(`${tmpDir}/archived-files`, { recursive: true });
+const extractArchivedFiles = async () => {
+  const encryptedArchive = fs.readFileSync(`${envSyncerDir}/archive.tar.gpg`)
+  const encryptedMessage = await openpgp.readMessage({
+    binaryMessage: encryptedArchive
+  });
+  const { data: decrypted } = await openpgp.decrypt({
+    message: encryptedMessage,
+    passwords: [envConfig.archivePassword],
+    format: 'binary'
+  });
 
+  fs.writeFileSync(`${envSyncerDir}/archive.tar`, Buffer.from(decrypted));
+
+  fs.mkdirSync(`${tmpDir}/archived-files`, { recursive: true });
   execSync(
-    `cd ${tmpDir}/archived-files; gpg --batch --passphrase ${envConfig.archivePassword} --yes -d ${envSyncerDir}/archive.tar.gpg | tar -x`
+    `cd ${tmpDir}/archived-files; tar -xvf ${envSyncerDir}/archive.tar; rm ${envSyncerDir}/archive.tar`
   );
 };
 
-const restoreFromArchive = () => {
-  execSync(
-    `cd ${rootDir}; gpg --batch --passphrase ${envConfig.archivePassword} --yes -d ${envSyncerDir}/archive.tar.gpg | tar -x`
-  );
+const restoreFromArchive = async () => {
+  const encryptedArchive = fs.readFileSync(`${envSyncerDir}/archive.tar.gpg`)
+  const encryptedMessage = await openpgp.readMessage({
+    binaryMessage: encryptedArchive
+  });
+  const { data: decrypted } = await openpgp.decrypt({
+    message: encryptedMessage,
+    passwords: [envConfig.archivePassword],
+    format: 'binary'
+  });
 
+  fs.writeFileSync(`${envSyncerDir}/archive.tar`, Buffer.from(decrypted));
+
+  execSync(
+    `cd ${rootDir}; tar -xvf ${envSyncerDir}/archive.tar; rm ${envSyncerDir}/archive.tar`
+  );
+  
   envFiles.forEach(c => {
     const filePath = `${rootDir}/${c.file}`;
     fs.writeFileSync(filePath, getFileContent(c, false));
   });
 };
 
-const printDiff = () => {
+const printDiff = async () => {
   console.log("Extracting archived for comparison...");
-  extractArchivedFiles();
+  await extractArchivedFiles();
 
   console.log("Copying decustomised env files...");
-  copyRestoredFiles();
+  await copyRestoredFiles();
 
   envFiles.forEach(c => {
     console.log(`Comparing ${c.file}...`);
