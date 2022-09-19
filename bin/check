@@ -14,13 +14,14 @@ const archivedChecksum = getArchivedChecksum();
 if (myChecksum !== archivedChecksum) {
   console.log(`${myChecksum} !== ${archivedChecksum}`);
   console.log("Checksum mismatch, have you updated your env variables?");
-  printDiff();
-  console.log("To update archive, run env_syncer/bin/archive");
-  console.log("To restore from archive, run env_syncer/bin/restore");
-
-  process.exitCode = 1;
+  printDiff().then(() => {
+    console.log("To update archive, run env_syncer/bin/archive");
+    console.log("To restore from archive, run env_syncer/bin/restore");
+    removeTempFolder();
+    process.exitCode = 1;  
+  });
 } else {
   console.log("Env variables in sync!");
+  removeTempFolder();
 }
 
-removeTempFolder();
